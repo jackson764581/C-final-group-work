@@ -1,0 +1,671 @@
+#include <iostream>
+#include <cstdlib>
+#include <string.h>
+#include <stdio.h>
+#include<iomanip>
+#include <fstream>
+using namespace std;
+#define N 20 //Maximum number of buses
+class Bus
+{
+    /*
+     Bus class, which describes vehicle attributes, including number()
+     name（）、type（）、start（）、terminal（）
+    */
+public:
+    int number;     //numbering
+    char name[20];   // Name(i.e.route)
+    char driver[20];
+    char type[20];   // Models
+    char start[20];   //Starting point
+    char terminal[20];//Terminal
+    int wznum;
+    int ticket1;//order ticket for normal bus
+    int ticket2;//order ticket for special bus
+    /*
+    The default constructor assigns all properties of the object an initial value of 0 or an empty string
+    */
+    Bus()
+    {
+        number = 0;
+        name[0] = '0';
+        driver[0] = '0';
+        type[0] = '0';
+        start[0] = '0';
+        terminal[0] = '0';
+        wznum = 0;
+        ticket1 = 20;
+        ticket2 = 40;
+
+    }
+    Bus(int number1, char* name1, char* driver1, char* type1, char* start1, char* terminal1, int wznum1)
+    {
+        number = number1;
+        strcpy_s(name, name1);
+        strcpy_s(driver, driver1);
+        strcpy_s(type, type1);
+        strcpy_s(start, start1);
+        strcpy_s(terminal, terminal1);
+        wznum = wznum1;
+    }
+    ~Bus() {} //destructor
+
+};
+
+class Company
+{
+    /*
+    Has an array pointer to the Bus class, and all the vehicle information handlers
+    */
+public:
+    int size;
+    Bus bus[N];
+    Bus bus1;
+
+    Company();
+    ~Company();
+    void welcome();                           // Welcome screen
+    void Keyboard_entry();                    // Keyboard entry into the main menu
+    void AddBus();                            // Increase vehicles
+    bool AddBus1(int number, char* name, char* driver, char* type, char* start, char* terminal, int wznum);   // Increase vehicles
+    void DeleteBus();                         // Delete a vehicle
+    bool DeleteBus2(int number);
+    void FindBusNum();
+    bool FindBusNum1(int number);                      // Determine whether the vehicle information exists, and find the vehicle by serial number
+    void FindBusNam();
+    bool FindBusNam1(char* name1);                     // Determine whether the vehicle information exists, and find the vehicle by name
+    void FindBusStart();
+    bool FindBusStart1(char* start1);                   //Determine whether the vehicle information exists, and find the vehicle by the departure station
+    void FindBusterminal();
+    bool FindBusterminal1(char* terminal1);             //Determine whether the vehicle information exists, and find the vehicle by the terminal station
+    void DispAll();                                    // Show all vehicles
+    void show();                                        //Show all vehicles for deleting vehicles
+    void Check_station();                               //See all stations
+    void Save_file();                                   //Save to a file
+    void File_input();                                  //Read from a file
+    void Buswz(); //Driver violation								
+    bool FindBusNum2(int number);
+    void yuyue();
+    bool orderbus1(int number, int ticket1, int ticket2);
+};
+
+Company::Company() //Company class constructor that initializes the bus class
+{
+    size = 0;
+    for (int i = 0; i < N; i++)
+    {
+        //bus[i] = NULL;
+    }
+}
+
+Company::~Company() {} //Company class destructor
+
+void Company::welcome() //Welcome interface, main menu
+{
+    int choose;
+
+    cout << "Please select a data source:" << endl;
+    cout << "1, input from file" << endl;
+    cout << "2, keyboard entry" << endl;
+    cin >> choose;
+    if (choose == 1)
+    {
+        File_input();                                 //  Reads information from a file
+    }
+    else if (choose == 2)
+    {
+        Keyboard_entry();                              // Keyboard input information
+    }
+    else
+    {
+        cout << "Mistyped! Please re-enter " << endl;
+        welcome();
+    }
+}
+
+void Company::Keyboard_entry() //Keyboard Entry, Main Menu
+{
+
+    int order;
+    cout << "------------------------------" << endl;
+    cout << " Welcome to the bus management system " << endl;
+    cout << "------------------------------" << endl << endl;
+    cout << "Please select what you want to do:" << endl;
+    cout << "1, add vehicle" << endl;
+    cout << "2, delete vehicle" << endl;
+    cout << "3, show all vehicles" << endl;
+    cout << "4、 Find Vehicle" << endl;
+    cout << "5、 View all stations " << endl;
+    cout << "6, save to file" << endl;
+    cout << "7, violation handling" << endl;
+    cout << "8、 appointment" << endl;
+    cout << "9, exit program" << endl;
+    cin >> order;
+    switch (order)
+    {
+    case 1:
+        AddBus();                    //Increase vehicles
+        break;
+    case 2:
+        DeleteBus();                 //Delete a vehicle
+        break;
+    case 3:
+        DispAll();                  // Show all vehicles
+        break;
+    case 4:
+        cout << "Please select a way to find a vehicle:" << endl;
+        cout << "1, find by name" << endl;
+        cout << "2, find by number" << endl;
+        cout << "3, find by origin" << endl;
+        cout << "4, find by terminal" << endl;
+        cin >> order;
+        if (order == 1)
+            FindBusNam();                  // Determine whether the vehicle information exists, and find the vehicle by name
+        else if (order == 2)
+            FindBusNum();                   //Determine whether the vehicle information exists, and find the vehicle by serial number
+        else if (order == 3)
+            FindBusStart();                // Determine whether the vehicle information exists, and find the vehicle by the departure station
+        else if (order == 4)
+            FindBusterminal();             // Determine whether the vehicle information exists, and find the vehicle by the terminal station
+        else
+            cout << "Input error! Exit the program..." << endl;
+        exit(1);
+        break;
+    case 5:
+        Check_station();                  //  See all stations
+        break;
+    case 6:
+        Save_file();                       // Save to a file
+        break;
+    case 7:
+        Buswz();
+        break;
+    case 8:yuyue();
+        break;
+    case 9:
+        cout << "You have quit the program!" << endl;
+        exit(1);
+    default:
+        cout << "Input error, please retype" << endl;
+        Keyboard_entry();
+    }
+}
+void Company::yuyue()
+{
+    int num, ticket1, ticket2;
+    ticket1 = 20;
+    ticket2 = 40;
+    cout << "Bus can be ordered" << endl;
+    show();
+    cout << "Please select the bus you want to order" << endl;
+    cin >> num;
+    orderbus1(num, ticket1, ticket2);
+    cout << "Press any button to continue!" << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+
+}
+void Company::File_input()
+{
+    //Need to use the knowledge of reading in the file to achieve,
+    int i = 0;
+    Bus BB;
+    ifstream infile("GJ.txt", ios::in);
+    //Open the disk file as imported
+    if (!infile)
+    {
+        cerr << "open error!" << endl;
+        exit(1);
+    }
+    for (i = 0; !infile.eof(); i++)
+    {
+        infile >> BB.number >> setw(8) >> BB.name >> setw(8) >> BB.driver >> setw(8) >> BB.type >> setw(8) >> BB.start >> setw(8) >> BB.terminal >> setw(8) >> BB.wznum;
+        cout << BB.number << setw(8) << BB.name << setw(8) << BB.driver << setw(8) << BB.type << setw(8) << BB.start << setw(8) << BB.terminal << endl;
+        AddBus1(BB.number, BB.name, BB.driver, BB.type, BB.start, BB.terminal, BB.wznum);
+    }
+    cout << "Read to" << i << "Group data" << endl;
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();// Returns to keyboard entry after reading in the file
+}
+
+bool Company::AddBus1(int number, char* name, char* driver, char* type, char* start, char* terminal, int wznum)
+{
+    int i;
+    Bus* bb;
+    bb = new Bus(number, name, driver, type, start, terminal, wznum);
+    for (i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (strcmp(bus1.name, name) == 0)
+        {
+            if (strcmp(bus1.name, name) == 0)
+            {
+                if (strcmp(bus1.type, type) == 0)
+                {
+                    if (strcmp(bus1.start, start) == 0)
+                    {
+                        if (strcmp(bus1.terminal, terminal) == 0)
+                        {
+                            cout << "This bus information already exists, input failed!" << endl;
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (i == size)
+    {
+        bus[size] = *bb;
+        size++;
+        cout << "Vehicle information entry successful!" << endl;
+        return true;
+    }
+    else
+        return false;
+}
+
+
+
+void Company::AddBus() //Add Vehicles
+{
+    /*
+    A function of the Company class that determines whether the input vehicle information is duplicated and adds the information that is not duplicated to the information summary table
+    */
+    int number22;       //numbering
+    char name22[20];    //Name(i.e.route)
+    char driver22[20];
+    char type22[20];    //Models
+    char start22[20];   //Starting point
+    char terminal22[20];//terminal
+    int type;
+    char ty[50];
+    cout << "-->> add vehicle" << endl;
+    cout << "You're adding vehicles" << endl;
+    cout << "Please enter the vehicle number:" << endl;
+    cin >> number22;
+    cout << "Please enter the vehicle name:" << endl;
+    cin >> name22;
+    cout << "Please enter the driver name:" << endl;
+    cin >> driver22;
+    cout << "Please enter the vehicle type:" << endl;
+    cout << "0.Other 1.Ordinary car 2.Air-conditioned car 3.Double decker car" << endl;
+    cin >> type;
+    switch (type)
+    {
+    case 0:
+        strcpy_s(ty, "other types");
+        strcpy_s(type22, ty);
+        break;
+    case 1:
+        strcpy_s(ty, "ordinary car");
+        strcpy_s(type22, ty);
+        break;
+    case 2:
+        strcpy_s(ty, "air-conditioned car");
+        strcpy_s(type22, ty);
+        break;
+    case 3:
+        strcpy_s(ty, "double decker");
+        strcpy_s(type22, ty);
+        break;
+    default:
+        cout << "Mistyped!" << endl;
+        AddBus();
+    }
+    cout << "Please enter the starting point of the vehicle:" << endl;
+    cin >> start22;
+    cout << "Please enter the end point of the vehicle:" << endl;
+    cin >> terminal22;
+    AddBus1(number22, name22, driver22, type22, start22, terminal22, 0);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+bool Company::orderbus1(int  number, int ticket1, int ticket2)
+{
+    int i, j;
+    string a;
+    for (i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (bus1.number == number)
+        {
+            cout << "If your choice is a double decker bus, please select 1! Else select 2!" << endl;
+            cin >> j;
+            if (j == 1)
+            {
+                cout << "Enter your name:" << endl;
+                cin >> a;
+                ofstream ofs;
+                ofs.open("yuyue.txt", ios::out);
+                ofs << number << "\t" << a << endl;
+                ofs.close();
+                ticket2 = ticket2 - 1;
+                if (ticket2 <= 0)
+                {
+                    cout << "Sorry! There is no ticket left." << endl;
+                }
+                else
+                {
+                    cout << "You have ordered successfully! There is/are " << ticket2 << "ticket(s) left" << endl;
+                }
+                return true;
+            }
+            if (j == 2)
+            {
+                cout << "Enter your name:" << endl;
+                cin >> a;
+                ofstream ofs;
+                ofs.open("yuyue.txt", ios::out);
+                ofs << number << "\t" << a << endl;
+                ofs.close();
+                ticket1 = ticket1 - 1;
+                if (ticket1 <= 0)
+                {
+                    cout << "Sorry! There is no ticket left." << endl;
+                }
+                else
+                {
+                    cout << "You have ordered successfully! There is/are " << ticket2 << "ticket(s) left" << endl;
+                }
+                return true;
+            }
+        }
+    }
+    if (i == size)
+    {
+        cout << "The bus you selected is not exist!" << endl;
+        return false;
+    }
+    return false;
+}
+
+bool Company::DeleteBus2(int  number)
+{
+    int i;
+    for (i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (bus1.number == number)
+        {
+            for (int j = i; j < size; j++)
+            {
+                bus1 = bus[j];
+                (bus1.number)--;
+                bus[j] = bus[j + 1];
+                if (j == size - 1)
+                    number = bus1.number;
+            }
+            cout << "This car information has been deleted!" << endl;
+            size--;
+            return true;
+        }
+    }
+    if (i == size)
+    {
+        cout << "This car information was not found and could not be deleted!" << endl;
+        return false;
+    }
+    return false;
+}
+
+void Company::DeleteBus() //Delete Vehicle
+{
+    /*
+    A function of the Company class that determines whether vehicle information exists based on the name of the vehicle entered by the user.
+    If present, find and display all vehicles with this name, and then prompt the user to select the vehicle to delete based on the displayed vehicle information
+    */
+    int num;
+    cout << "-->> delete vehicle" << endl;
+    show();
+    cout << "Please select the number of the vehicle you want to delete:" << endl;
+    cin >> num;
+    DeleteBus2(num);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+
+bool Company::FindBusNum1(int number)
+{
+    int i;
+    for (i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (bus1.number == number)
+        {
+            cout << bus1.number << "The information for bus number is:" << endl;
+            cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << setw(8) << "Number of Violations" << "*" << endl;
+            cout << setiosflags(ios::left) << "          *         " << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << bus1.wznum << setw(8) << "*" << endl;
+            return true;
+        }
+    }
+    if (i == size)
+    {
+        cout << "No information about the car!" << endl;
+        return false;
+    }
+    return false;
+}
+bool Company::FindBusNum2(int number)
+{
+    int i;
+    for (i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (bus1.number == number)
+        {
+            cout << bus1.number << "The information for bus number is:" << endl;
+            cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << setw(8) << "Number of Violations" << "*" << endl;
+            cout << setiosflags(ios::left) << "          *         " << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << bus1.wznum << setw(8) << "*" << endl;
+            bus[i].wznum += 1;
+            if (bus[i].wznum >= 3)cout << "The car has violated the law more than or equal to 3 times, please interview the driver" << endl;
+            return true;
+        }
+    }
+    if (i == size)
+    {
+        cout << "No information about the car!" << endl;
+        return false;
+    }
+    return false;
+}
+void Company::FindBusNum() //Determine if vehicle information exists, find vehicles
+{
+    int account;
+    cout << "Please enter the vehicle number you are looking for:";
+    cin >> account;
+    FindBusNum1(account);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+void Company::Buswz() //Determine if vehicle information exists, find vehicles
+{
+    int account;
+    cout << "Please enter the vehicle number to be violated:";
+    cin >> account;
+    FindBusNum2(account);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+bool Company::FindBusNam1(char* name1)
+{
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (strcmp(bus1.name, name1) == 0)
+        {
+            cout << "The information for buses with route name " << bus1.name << " is: " << endl;
+            cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << "*" << endl;
+            cout << setiosflags(ios::left) << "          *         " << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << "*" << endl;
+            return true;
+        }
+        if (i == size)
+        {
+            cout << "No information about the car!" << endl;
+            return false;
+        }
+        return false;
+    }
+}
+
+void Company::FindBusNam() //Determine if vehicle information exists, find vehicles
+{
+    char name11[10];
+    cout << "Please enter the name of the vehicle you want to find:" << endl;
+    cin >> name11;
+    FindBusNam1(name11);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+
+bool Company::FindBusStart1(char* start1)
+{
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (strcmp(bus1.start, start1) == 0)
+        {
+            cout << "The information for a bus with a departure stop" << bus1.start << "is: " << endl;
+            cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << "*" << endl;
+            cout << setiosflags(ios::left) << "                *" << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << "*" << endl;
+            return true;
+        }
+        if (i == size)
+        {
+            cout << "No information about the car!" << endl;
+            return false;
+        }
+        return false;
+    }
+}
+
+void Company::FindBusStart() //Determine if vehicle information exists, find vehicles
+{
+    char start11[10];
+    cout << "Please enter the departure station of the vehicle you want to find:" << endl;
+    cin >> start11;
+    FindBusStart1(start11);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+
+bool Company::FindBusterminal1(char* terminal1)
+{
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        if (strcmp(bus1.terminal, terminal1) == 0)
+        {
+            cout << "The information for a bus with a terminal stop" << bus1.terminal << "is: " << endl;
+            cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << "*" << endl;
+            cout << setiosflags(ios::left) << "                *" << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << "*" << endl;
+            return true;
+        }
+        if (i == size)
+        {
+            cout << "No information about the car!" << endl;
+            return false;
+        }
+        return false;
+    }
+}
+
+void Company::FindBusterminal() //Determine if vehicle information exists, find vehicles by terminus
+{
+    char terminal11[10];
+    cout << "Please enter the terminal where you want to find the vehicle:" << endl;
+    cin >> terminal11;
+    FindBusterminal1(terminal11);
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+
+void Company::DispAll() //Show all vehicles
+{
+    cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << setw(8) << "Number of Violations" << "*" << endl;
+
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        cout << setiosflags(ios::left) << "           *       " << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << bus1.wznum << setw(8) << "*" << endl;
+
+    }
+    cout << endl;
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+    /*
+    A function of the Company class that outputs all vehicle information
+    */
+}
+
+void Company::show() // Displays vehicle information for deleting vehicles
+{
+    cout << setiosflags(ios::left) << " * " << setw(8) << "number" << setw(8) << "name" << setw(8) << "driver" << setw(8) << "type" << setw(8) << "Origin" << setw(8) << "Terminal" << "*" << endl;
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        cout << setiosflags(ios::left) << "           *       " << setw(8) << bus1.number << setw(8) << bus1.name << setw(8) << bus1.driver << setw(8) << bus1.type << setw(8) << bus1.start << setw(8) << bus1.terminal << setw(8) << "*" << endl;
+
+    }
+    cout << endl;
+}
+
+void Company::Check_station() //View all stations
+{
+    cout << "All bus stops have:" << endl;
+    for (int i = 0; i < size; i++)
+    {
+        bus1 = bus[i];
+        cout << bus1.start << ", " << bus1.terminal << "  ";
+    }
+    cout << endl << endl;
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry();
+}
+
+void Company::Save_file() // Stored to a file
+{
+    ofstream outfile("GJ.txt", ios::out);
+    if (!outfile)
+    {
+        cerr << "open error!" << endl;
+        exit(1);
+    }
+    for (int i = 0; i < size; i++)
+    {
+        outfile << bus[i].number << setw(8) << bus[i].name << setw(8) << bus[i].driver << setw(8) << bus[i].type << setw(8) << bus[i].start << setw(8) << bus[i].terminal << endl;
+    }
+    outfile.close();
+    cout << "File writed successfully" << endl << endl;
+    cout << "Press any key to continue..." << endl;
+    fflush(stdin);
+    getchar();
+    Keyboard_entry(); //Returns to keyboard entry after reading in the file
+}
+
+int main()
+{
+    Company bus;
+    bus.welcome();
+}
